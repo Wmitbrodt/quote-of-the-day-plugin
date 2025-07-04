@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css" />
+  <script src="../../../../scripts/buildfire.js"></script>
+</head>
+<body>
+  <h3>Quote of the Day</h3>
+  <input type="text" id="quoteInput" placeholder="Enter your quote..." style="width: 100%; padding: 8px;" />
+  <button onclick="saveQuote()" style="margin-top: 10px;">Save Quote</button>
+
+  <script>
+    // Load existing quote from datastore
+    buildfire.datastore.get("quote", (err, result) => {
+      if (result && result.data && result.data.text) {
+        document.getElementById("quoteInput").value = result.data.text;
+      }
+    });
+
+    function saveQuote() {
+      const text = document.getElementById("quoteInput").value;
+      buildfire.datastore.save({ text }, "quote", (err, result) => {
+        if (err) return alert("Error saving quote.");
+        alert("Quote saved!");
+      });
+    }
+  </script>
+</body>
+</html>

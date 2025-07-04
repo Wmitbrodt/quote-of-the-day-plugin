@@ -1,0 +1,24 @@
+{
+  "author": "BuildFire",
+  "pluginName": "Quote of the day",
+  "pluginDescription": "Quote of the day",
+  "supportEmail": "wmitbrodt@buildfire.com",
+  "control": {
+    "content": {
+      "enabled": true,
+      "html": "control/content/index.html"
+    },
+    "design": {
+      "enabled": false
+    },
+    "settings": {
+      "enabled": true
+    }
+  },
+  "widget": {
+    "enabled": true,
+    "html": "widget/index.html"
+  },
+  "features": [],
+  "languages": ["en"]
+}
