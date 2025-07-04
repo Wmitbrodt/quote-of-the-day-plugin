@@ -1,21 +1,23 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css" />
   <script src="../../../scripts/buildfire.js"></script>
 </head>
+
 <body>
   <h3>Quote of the Day</h3>
   <p id="quote">Loading...</p>
 
-  <script src="../../../scripts/buildfire.js"></script>
-  <script src="../../../scripts/buildfire.js"></script>
   <script>
     function loadQuote() {
       buildfire.datastore.get("quote", (err, result) => {
-        const quote = result?.data?.text || "No quote saved.";
-        document.getElementById("quote").innerText = quote;
+        const text = result?.data?.text || "No quote saved.";
+        const author = result?.data?.author || "";
+        const fullQuote = author ? `"${text}" — ${author}` : `"${text}"`;
+        document.getElementById("quote").innerText = fullQuote;
       });
     }
 
