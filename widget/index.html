@@ -6,17 +6,26 @@
   <script src="../../../scripts/buildfire.js"></script>
 </head>
 <body>
-  <h2>Quote of the Day</h2>
+  <h3>Quote of the Day</h3>
   <p id="quote">Loading...</p>
 
+  <script src="../../../scripts/buildfire.js"></script>
+  <script src="../../../scripts/buildfire.js"></script>
   <script>
-    buildfire.datastore.get("quote", (err, result) => {
-      if (result && result.data && result.data.text) {
-        document.getElementById("quote").innerText = result.data.text;
-      } else {
-        document.getElementById("quote").innerText = "No quote set yet.";
-      }
+    function loadQuote() {
+      buildfire.datastore.get("quote", (err, result) => {
+        const quote = result?.data?.text || "No quote saved.";
+        document.getElementById("quote").innerText = quote;
+      });
+    }
+
+    loadQuote();
+
+    // Listen for real-time updates
+    buildfire.datastore.onUpdate(() => {
+      loadQuote();
     });
   </script>
 </body>
+
 </html>
