@@ -9,6 +9,8 @@
 <body>
   <h2>Quote of the Day</h2>
 
+  <div id="errorMsg" style="color: red; margin-bottom: 10px;"></div>
+
   <input id="quoteInput" type="text" placeholder="Enter a quote" style="width: 100%; padding: 8px;" />
   <input id="authorInput" type="text" placeholder="Enter the author"
     style="width: 100%; padding: 8px; margin-top: 8px;" />
@@ -23,18 +25,26 @@
     const dateInput = document.getElementById("dateInput");
     const saveBtn = document.getElementById("saveBtn");
     const quoteList = document.getElementById("quoteList");
+    const errorMsg = document.getElementById("errorMsg");
+
+    let allQuotes = [];
+
+    function showError(message) {
+      errorMsg.textContent = message;
+      setTimeout(() => errorMsg.textContent = "", 4000);
+    }
 
     function renderQuotes() {
       buildfire.datastore.search({}, "quotes", (err, result) => {
         if (err) return console.error("Error loading quotes:", err);
+        allQuotes = result.map(item => ({ id: item.id, ...item.data }));
 
         quoteList.innerHTML = "";
-        result.forEach(item => {
-          const q = item.data;
+        allQuotes.forEach(item => {
           const div = document.createElement("div");
           div.style.marginTop = "10px";
-          div.innerHTML = `"${q.text}" — ${q.author || "Unknown"}<br/>
-            <small>Scheduled: ${q.scheduledDate || "None"}</small>
+          div.innerHTML = `"${item.text}" — ${item.author || "Unknown"}<br/>
+            <small>Scheduled: ${item.scheduledDate || "None"}</small>
             <button onclick="deleteQuote('${item.id}')">Delete</button>`;
           quoteList.appendChild(div);
         });
@@ -51,17 +61,23 @@
     saveBtn.onclick = () => {
       const quoteText = quoteInput.value.trim();
       const authorText = authorInput.value.trim();
-      const scheduledDate = dateInput.value;
+      const scheduledDate = dateInput.value || null;
 
       if (!quoteText) {
-        alert("Quote cannot be empty");
+        showError("Quote cannot be empty");
+        return;
+      }
+
+      // Check for duplicate scheduledDate
+      if (scheduledDate && allQuotes.some(q => q.scheduledDate === scheduledDate)) {
+        showError("A quote is already scheduled for this date.");
         return;
       }
 
       const newQuote = {
         text: quoteText,
         author: authorText,
-        scheduledDate: scheduledDate || null,
+        scheduledDate,
         createdAt: new Date().toISOString()
       };
 
