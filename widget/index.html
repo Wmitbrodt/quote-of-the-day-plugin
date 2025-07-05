@@ -12,20 +12,29 @@
   <p id="quote">Loading...</p>
 
   <script>
-    function loadQuote() {
-      buildfire.datastore.get("quote", (err, result) => {
-        const text = result?.data?.text || "No quote saved.";
-        const author = result?.data?.author || "";
-        const fullQuote = author ? `"${text}" — ${author}` : `"${text}"`;
+    function loadQuoteOfTheDay() {
+      buildfire.datastore.get("quotes", (err, result) => {
+        const quotes = result?.data?.quotes || [];
+        const today = new Date().getDay(); // 0 (Sun) to 6 (Sat)
+
+        if (quotes.length === 0) {
+          document.getElementById("quote").innerText = "No quotes available.";
+          return;
+        }
+
+        // Fallback to a random quote if less than 7 available
+        const index = quotes.length >= 7 ? today % quotes.length : Math.floor(Math.random() * quotes.length);
+        const selected = quotes[index];
+        const fullQuote = `"${selected.text}" — ${selected.author}`;
         document.getElementById("quote").innerText = fullQuote;
       });
     }
 
-    loadQuote();
+    loadQuoteOfTheDay();
 
-    // Listen for real-time updates
+    // Update on real-time change (optional)
     buildfire.datastore.onUpdate(() => {
-      loadQuote();
+      loadQuoteOfTheDay();
     });
   </script>
 </body>

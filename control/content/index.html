@@ -1,35 +1,92 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="../../../../scripts/buildfire.js"></script>
+</head>
+
 <body>
   <h2>Quote of the Day</h2>
 
   <input id="quoteInput" type="text" placeholder="Enter a quote" style="width: 100%; padding: 8px;" />
   <input id="authorInput" type="text" placeholder="Enter the author"
     style="width: 100%; padding: 8px; margin-top: 8px;" />
-
   <button id="saveBtn" style="margin-top: 10px; padding: 8px 16px;">Save Quote</button>
 
-  <script src="../../../../scripts/buildfire.js"></script>
+  <h3>Live Preview</h3>
+  <p id="previewText">Nothing selected</p>
+
+  <h3>All Saved Quotes</h3>
+  <ul id="quoteList"></ul>
+
   <script>
     const quoteInput = document.getElementById("quoteInput");
     const authorInput = document.getElementById("authorInput");
     const button = document.getElementById("saveBtn");
+    const previewText = document.getElementById("previewText");
+    const quoteList = document.getElementById("quoteList");
 
-    // Load existing quote and author
-    buildfire.datastore.get("quote", (err, result) => {
-      if (result && result.data) {
-        quoteInput.value = result.data.text || "";
-        authorInput.value = result.data.author || "";
-      }
-    });
+    let allQuotes = [];
 
-    // Save quote and author
-    button.onclick = () => {
-      const quoteText = quoteInput.value.trim();
-      const authorText = authorInput.value.trim();
+    function renderQuotes() {
+      quoteList.innerHTML = "";
+      allQuotes.forEach((quoteObj, index) => {
+        const li = document.createElement("li");
+        li.textContent = `"${quoteObj.text}" — ${quoteObj.author}`;
+        li.style.cursor = "pointer";
+        li.onclick = () => {
+          previewText.textContent = `"${quoteObj.text}" — ${quoteObj.author}`;
+          quoteInput.value = quoteObj.text;
+          authorInput.value = quoteObj.author;
+        };
 
-      buildfire.datastore.save({ text: quoteText, author: authorText }, "quote", (err, result) => {
-        if (err) return alert("Error saving quote");
-        alert("Quote saved!");
+        const deleteBtn = document.createElement("button");
+        deleteBtn.textContent = "🗑️";
+        deleteBtn.style.marginLeft = "10px";
+        deleteBtn.onclick = (e) => {
+          e.stopPropagation();
+          allQuotes.splice(index, 1);
+          saveQuotesToStorage();
+        };
+
+        li.appendChild(deleteBtn);
+        quoteList.appendChild(li);
       });
+    }
+
+    function saveQuotesToStorage() {
+      buildfire.datastore.save({ quotes: allQuotes }, "quotes", (err, result) => {
+        if (err) alert("Error saving");
+        renderQuotes();
+      });
+    }
+
+    function loadQuotes() {
+      buildfire.datastore.get("quotes", (err, result) => {
+        if (result?.data?.quotes) {
+          allQuotes = result.data.quotes;
+        }
+        renderQuotes();
+      });
+    }
+
+    button.onclick = () => {
+      const text = quoteInput.value.trim();
+      const author = authorInput.value.trim();
+
+      if (!text || !author) return alert("Both fields are required");
+
+      allQuotes.unshift({ text, author });
+      saveQuotesToStorage();
+
+      quoteInput.value = "";
+      authorInput.value = "";
+      previewText.textContent = "";
     };
+
+    loadQuotes();
   </script>
 </body>
+
+</html>
