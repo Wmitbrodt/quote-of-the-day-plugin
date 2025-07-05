@@ -2,37 +2,51 @@
 <html>
 
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quote of the Day</title>
+  <link rel="stylesheet" href="../content/style.css" />
   <script src="../../../scripts/buildfire.js"></script>
 </head>
 
 <body>
   <h3>Quote of the Day</h3>
-  <p id="quote">Loading...</p>
+  <p id="quoteText">Loading...</p>
 
   <script>
-    function loadQuoteOfTheDay() {
-      buildfire.datastore.get("quotes", (err, result) => {
-        const quotes = result?.data?.quotes || [];
-        const today = new Date().getDay(); // 0 (Sun) to 6 (Sat)
+    // Force local timezone date (not UTC)
+    function getTodayLocalDateString() {
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const day = String(today.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`; // 'YYYY-MM-DD'
+    }
 
-        if (quotes.length === 0) {
-          document.getElementById("quote").innerText = "No quotes available.";
+    function loadQuoteOfTheDay() {
+      const today = getTodayLocalDateString();
+
+      buildfire.datastore.search({ sort: { createdAt: 1 } }, "quotes", (err, result) => {
+        if (err || !result || !result.length) {
+          document.getElementById("quoteText").innerText = "No quotes available.";
           return;
         }
 
-        // Fallback to a random quote if less than 7 available
-        const index = quotes.length >= 7 ? today % quotes.length : Math.floor(Math.random() * quotes.length);
-        const selected = quotes[index];
-        const fullQuote = `"${selected.text}" — ${selected.author}`;
-        document.getElementById("quote").innerText = fullQuote;
+        const todayQuote = result.find(item => {
+          const sched = item.data?.scheduledDate;
+          return sched === today;
+        });
+
+        const quoteToShow = todayQuote || result[0];
+        const { text, author } = quoteToShow.data;
+        const display = author ? `"${text}" — ${author}` : `"${text}"`;
+        document.getElementById("quoteText").innerText = display;
       });
     }
 
     loadQuoteOfTheDay();
 
-    // Update on real-time change (optional)
+    // Live update
     buildfire.datastore.onUpdate(() => {
       loadQuoteOfTheDay();
     });
