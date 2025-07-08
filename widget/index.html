@@ -1,85 +1,28 @@
 <!DOCTYPE html>
 <html>
-
 <head>
   <meta charset="UTF-8" />
-  <!-- Ensures proper scaling on phones and tablets -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Quote of the Day</title>
-
-  <!-- Link to your CSS styles (lives in the content/ folder) -->
-  <link rel="stylesheet" href="../content/style.css" />
-
-  <!-- Load the BuildFire SDK so we can use its data API -->
-  <script src="../../../scripts/buildfire.js"></script>
+  <link rel="stylesheet" href="./style.css" />
+  <script src="../../../../scripts/buildfire.js"></script>
 </head>
 
 <body>
-  <!-- Title displayed at the top of the widget -->
   <h3>Quote of the Day</h3>
 
-  <!-- This paragraph will be filled with the quote -->
-  <p id="quoteText">Loading...</p>
+  <label for="categorySelect"><strong>Select a category:</strong></label>
+  <select id="categorySelect">
+    <option value="">-- Choose a category --</option>
+  </select>
 
-  <script>
-    /**
-     * Helper function to get today's date
-     * in the local time zone, formatted as 'YYYY-MM-DD'
-     */
-    function getTodayLocalDateString() {
-      const today = new Date(); // Get current date and time
-      const year = today.getFullYear(); // e.g. 2025
-      const month = String(today.getMonth() + 1).padStart(2, '0'); // Months start at 0, so add 1
-      const day = String(today.getDate()).padStart(2, '0'); // Get day of month
-      return `${year}-${month}-${day}`; // Format it as "YYYY-MM-DD"
-    }
-
-    /**
-     * This function loads today's quote from the BuildFire datastore
-     * and displays it inside the <p id="quoteText"> element.
-     */
-    function loadQuoteOfTheDay() {
-      const today = getTodayLocalDateString(); // e.g. "2025-07-07"
-
-      // Fetch all quotes from the "quotes" collection, sorted by when they were created
-      buildfire.datastore.search({ sort: { createdAt: 1 } }, "quotes", (err, result) => {
-        if (err || !result || !result.length) {
-          // If there's an error or no quotes exist, show fallback message
-          document.getElementById("quoteText").innerText = "No quotes available.";
-          return;
-        }
-
-        // Try to find a quote that is scheduled exactly for today's date
-        const todayQuote = result.find(item => {
-          const sched = item.data?.scheduledDate; // Optional chaining in case data is missing
-          return sched === today;
-        });
-
-        // Use today's scheduled quote if found, otherwise just use the first quote in the list
-        const quoteToShow = todayQuote || result[0];
-
-        // Pull the quote text and author name from the data
-        const { text, author } = quoteToShow.data;
-
-        // Format the quote display with or without author name
-        const display = author ? `"${text}" — ${author}` : `"${text}"`;
-
-        // Insert the formatted quote into the HTML element
-        document.getElementById("quoteText").innerText = display;
-      });
-    }
-
-    // Load a quote as soon as the widget loads
-    loadQuoteOfTheDay();
-
-    /**
-     * Listen for any live updates (like new quotes being added from the control panel)
-     * and refresh the displayed quote when that happens.
-     */
-    buildfire.datastore.onUpdate(() => {
-      loadQuoteOfTheDay();
-    });
-  </script>
+  <div id="quoteContainer" style="margin-top: 20px; display: none;">
+    <p id="quoteText">"Loading..."</p>
+    <p id="quoteAuthor" style="font-style: italic;"></p>
+    <button id="anotherBtn" style="margin-top: 10px;">Show Another</button>
+  </div>
+  
+  <script src="../../../../scripts/buildfire.js"></script>
+  <script src="./js/main.js"></script>
 </body>
-
 </html>
