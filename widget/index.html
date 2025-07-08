@@ -9,7 +9,10 @@
 </head>
 
 <body>
-  <h3>Quote of the Day</h3>
+  <div class="greeting-block" style="margin-bottom: 1rem;">
+    <h2 id="greetingText" style="margin: 0;"></h2>
+    <p id="currentTime" style="margin: 0; font-style: italic;"></p>
+  </div>
 
   <label for="categorySelect"><strong>Select a category:</strong></label>
   <select id="categorySelect">
@@ -21,7 +24,7 @@
     <p id="quoteAuthor" style="font-style: italic;"></p>
     <button id="anotherBtn" style="margin-top: 10px;">Show Another</button>
   </div>
-  
+
   <script src="../../../../scripts/buildfire.js"></script>
   <script src="./js/main.js"></script>
 </body>
